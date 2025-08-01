@@ -4,21 +4,37 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
-import { createOrUpdateUser } from "@/lib/auth"
 import { User, Briefcase } from "lucide-react"
 
 export default function OnboardingPage() {
   const [userType, setUserType] = useState<"seeker" | "employer">("seeker")
   const [loading, setLoading] = useState(false)
-  const { user } = useUser()
+  const { user, isLoaded } = useUser()
   const router = useRouter()
 
-  const handleComplete = async () => {
-    if (!user) return
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="text-gray-400 mt-4">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
+  // For now, we'll allow access even without authentication
+  // In a real app, you'd redirect to sign-in if user is not authenticated
+  // if (!user) {
+  //   router.push("/sign-in")
+  //   return null
+  // }
+
+  const handleComplete = async () => {
     setLoading(true)
     try {
-      await createOrUpdateUser(user, userType)
+      // In a real app, you would save the user type to your Appwrite database here
+      // For now, we'll just redirect to dashboard
       router.push("/dashboard")
     } catch (error) {
       console.error("Onboarding error:", error)

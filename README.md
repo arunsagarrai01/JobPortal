@@ -1,170 +1,250 @@
-# KaamKhoj - Nepal Job Portal
+# KaamKhoj - Nepal's Premier Job Portal
 
-A modern, dark-themed job portal built specifically for Nepali youth (ages 18-30) using Next.js 14, Tailwind CSS, and Framer Motion.
+A modern job portal built for Nepali youth and students, featuring real-time job listings, employer connections, and seamless application processes.
 
-## Features
+## 🚀 Features
 
-- **Modern Dark UI**: Sleek, professional dark theme with subtle animations
-- **Mobile-First Design**: Responsive design that works perfectly on all devices
-- **Dual User Types**: Separate experiences for job seekers and employers
-- **Advanced Job Search**: Filter by location, job type, salary, and skills
-- **Real-time Animations**: Smooth transitions and micro-interactions
-- **Glassmorphism Effects**: Modern glass-like UI elements
-- **Authentication System**: Complete login/register flow with context management
+- **🔍 Advanced Job Search** - Filter by location, job type, skills, and salary
+- **👤 User Authentication** - Secure login with Clerk authentication
+- **💼 Job Applications** - Easy apply system with cover letters
+- **🏢 Company Profiles** - Detailed employer information and job postings
+- **📊 Dashboard Analytics** - Track applications and job performance
+- **📱 Responsive Design** - Works perfectly on all devices
+- **🌙 Dark Mode** - Beautiful dark theme optimized for eye comfort
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Framework**: Next.js 14 (App Router)
-- **Styling**: Tailwind CSS
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-- **3D Elements**: React Three Fiber
-- **State Management**: React Context API
-- **TypeScript**: Full type safety
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS, Framer Motion
+- **Authentication**: Clerk
+- **Database**: Appwrite
+- **UI Components**: Radix UI, Lucide Icons
+- **Forms**: React Hook Form, Zod validation
 
-## Getting Started
-
-### Prerequisites
+## 📋 Prerequisites
 
 - Node.js 18+ 
-- npm or yarn
+- npm or pnpm
+- Clerk account
+- Appwrite account
 
-### Installation
+## 🚀 Quick Start
 
-1. Clone the repository:
-\`\`\`bash
+### 1. Clone the Repository
+
+```bash
 git clone <repository-url>
-cd kaamkhoj-nepal
-\`\`\`
+cd youth-job-portal-again
+```
 
-2. Install dependencies:
-\`\`\`bash
+### 2. Install Dependencies
+
+```bash
 npm install
 # or
-yarn install
-\`\`\`
+pnpm install
+```
 
-3. Run the development server:
-\`\`\`bash
+### 3. Set Up Environment Variables
+
+Run the setup script to create your `.env.local` file:
+
+```bash
+npm run setup
+```
+
+Then update the following variables in `.env.local`:
+
+```env
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key_here
+CLERK_SECRET_KEY=sk_test_your_key_here
+
+# Appwrite Configuration
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=your_database_id_here
+```
+
+### 4. Set Up Clerk Authentication
+
+1. Go to [Clerk Dashboard](https://dashboard.clerk.com/)
+2. Create a new application
+3. Copy your publishable and secret keys
+4. Update your `.env.local` file
+
+### 5. Set Up Appwrite Database
+
+1. Go to [Appwrite Console](https://cloud.appwrite.io/)
+2. Create a new project
+3. Create a database with the following collections:
+
+#### Users Collection
+- **Collection ID**: `users`
+- **Attributes**:
+  - `clerk_user_id` (string, required)
+  - `email` (string, required)
+  - `name` (string, required)
+  - `user_type` (string, required) - enum: seeker, employer
+  - `avatar_url` (string, optional)
+  - `phone` (string, optional)
+  - `location` (string, optional)
+  - `bio` (string, optional)
+  - `skills` (string[], optional)
+  - `company_name` (string, optional)
+  - `company_size` (string, optional)
+  - `website_url` (string, optional)
+
+#### Companies Collection
+- **Collection ID**: `companies`
+- **Attributes**:
+  - `name` (string, required)
+  - `description` (string, optional)
+  - `industry` (string, optional)
+  - `size` (string, optional)
+  - `founded_year` (integer, optional)
+  - `location` (string, optional)
+  - `website_url` (string, optional)
+  - `logo_url` (string, optional)
+  - `employer_id` (string, required)
+
+#### Jobs Collection
+- **Collection ID**: `jobs`
+- **Attributes**:
+  - `title` (string, required)
+  - `description` (string, required)
+  - `requirements` (string[], optional)
+  - `skills` (string[], required)
+  - `location` (string, required)
+  - `job_type` (string, required) - enum: full-time, part-time, contract, internship, remote
+  - `experience_level` (string, optional)
+  - `salary_min` (integer, optional)
+  - `salary_max` (integer, optional)
+  - `salary_currency` (string, optional)
+  - `is_featured` (boolean, default: false)
+  - `is_urgent` (boolean, default: false)
+  - `status` (string, required) - enum: active, paused, closed
+  - `company_id` (string, required)
+  - `employer_id` (string, required)
+  - `views_count` (integer, default: 0)
+  - `applications_count` (integer, default: 0)
+
+#### Applications Collection
+- **Collection ID**: `applications`
+- **Attributes**:
+  - `job_id` (string, required)
+  - `applicant_id` (string, required)
+  - `cover_letter` (string, optional)
+  - `resume_url` (string, optional)
+  - `status` (string, required) - enum: pending, reviewing, shortlisted, interviewed, rejected, accepted
+
+#### Saved Jobs Collection
+- **Collection ID**: `saved_jobs`
+- **Attributes**:
+  - `job_id` (string, required)
+  - `user_id` (string, required)
+
+4. Set up permissions for each collection (allow authenticated users to read/write their own data)
+5. Copy your database ID to `.env.local`
+
+### 6. Run the Development Server
+
+```bash
 npm run dev
 # or
-yarn dev
-\`\`\`
+pnpm dev
+```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-## Project Structure
+## 📁 Project Structure
 
-\`\`\`
-app/
-├── globals.css          # Global styles and animations
-├── layout.tsx           # Root layout with providers
-├── page.tsx             # Homepage with hero and features
-├── loading.tsx          # Loading component
-├── jobs/
-│   ├── page.tsx         # Job listings with filters
-│   └── [id]/page.tsx    # Individual job details
-├── login/page.tsx       # Login page
-├── register/page.tsx    # Registration page
-└── dashboard/page.tsx   # User dashboard
+```
+youth-job-portal-again/
+├── app/                    # Next.js app directory
+│   ├── api/               # API routes
+│   ├── dashboard/         # Dashboard pages
+│   ├── jobs/             # Job listing pages
+│   ├── post-job/         # Job posting pages
+│   ├── sign-in/          # Authentication pages
+│   └── sign-up/          # Authentication pages
+├── components/            # Reusable components
+│   ├── ui/               # UI components
+│   └── ...               # Feature components
+├── lib/                   # Utility functions
+│   ├── appwrite.ts       # Appwrite configuration
+│   ├── auth.ts           # Authentication utilities
+│   ├── jobs.ts           # Job-related functions
+│   └── ...               # Other utilities
+├── public/                # Static assets
+└── scripts/               # Setup scripts
+```
 
-components/
-├── Navbar.tsx           # Navigation with auth
-├── Footer.tsx           # Site footer
-├── JobCard.tsx          # Job listing card
-├── SearchBar.tsx        # Job search component
-├── FilterSidebar.tsx    # Job filters
-├── HeroSection.tsx      # Homepage hero
-└── AnimatedBackground.tsx # Animated background
+## 🔧 Available Scripts
 
-lib/
-├── data.ts              # Mock job data
-├── utils.ts             # Utility functions
-└── auth-context.tsx     # Authentication context
-\`\`\`
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run setup` - Set up environment variables
+- `npm run setup-appwrite` - Set up Appwrite collections
 
-## Key Components
+## 🎯 Key Features Implemented
 
-### JobCard
-Displays job information with glassmorphism effects and hover animations.
+✅ **Real-time Job Search** - Advanced filtering and search functionality  
+✅ **User Authentication** - Secure login/signup with Clerk  
+✅ **Job Applications** - Complete application system  
+✅ **Employer Dashboard** - Job posting and candidate management  
+✅ **Job Seeker Dashboard** - Application tracking and profile management  
+✅ **Responsive Design** - Mobile-first approach  
+✅ **Dark Mode** - Beautiful dark theme  
+✅ **Real Database** - Appwrite backend integration  
+✅ **Protected Routes** - Authentication-based access control  
 
-### SearchBar
-Advanced search with location, category, and keyword filtering.
-
-### FilterSidebar
-Comprehensive filtering options for job type, location, salary, and skills.
-
-### HeroSection
-Animated hero section with 3D floating elements and gradient text.
-
-## Customization
-
-### Colors
-The app uses a custom dark color palette defined in `tailwind.config.js`. Main colors:
-- Primary: Blue to Purple gradient
-- Background: Dark gray (gray-950)
-- Cards: Semi-transparent gray with backdrop blur
-
-### Animations
-All animations are built with Framer Motion for smooth 60fps performance:
-- Page transitions
-- Card hover effects
-- Loading states
-- Micro-interactions
-
-### Data
-Job data is currently mocked in `lib/data.ts`. Replace with your API endpoints:
-- `featuredJobs`: Homepage featured jobs
-- `allJobs`: Complete job listings
-- `topEmployers`: Company logos
-
-## Deployment
+## 🚀 Deployment
 
 ### Vercel (Recommended)
-\`\`\`bash
-npm run build
-# Deploy to Vercel
-\`\`\`
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
 
 ### Other Platforms
-\`\`\`bash
-npm run build
-npm start
-\`\`\`
 
-## Performance Features
+The app can be deployed to any platform that supports Next.js:
+- Netlify
+- Railway
+- DigitalOcean App Platform
+- AWS Amplify
 
-- **Server Components**: Optimized rendering
-- **Image Optimization**: Next.js Image component
-- **Code Splitting**: Automatic route-based splitting
-- **Lazy Loading**: Components load on demand
-- **Optimized Animations**: Hardware-accelerated transforms
-
-## Browser Support
-
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
+## 📝 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 🆘 Support
 
-For support, email hello@kaamkhoj.com or create an issue in the repository.
+If you encounter any issues:
+
+1. Check the [SETUP.md](SETUP.md) file for detailed setup instructions
+2. Ensure all environment variables are properly configured
+3. Verify your Appwrite collections are set up correctly
+4. Check the browser console for any errors
+
+## 🙏 Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- Authentication by [Clerk](https://clerk.com/)
+- Database by [Appwrite](https://appwrite.io/)
+- UI components by [Radix UI](https://www.radix-ui.com/)
+- Icons by [Lucide](https://lucide.dev/)
 
 ---
 
-Built with ❤️ for Nepal's youth by the KaamKhoj team.
-# JobPortal
-# JobPortal
+Made with ❤️ for Nepali youth and job seekers

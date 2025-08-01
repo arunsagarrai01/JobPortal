@@ -2,18 +2,65 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { createJobPosting } from "@/lib/actions"
-import { Briefcase, MapPin, DollarSign, Users, FileText, Star } from "lucide-react"
+import { Briefcase, MapPin, DollarSign, Users, FileText, Star, CheckCircle, AlertCircle } from "lucide-react"
 
 export default function JobPostingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   async function handleSubmit(formData: FormData) {
     setIsSubmitting(true)
+    setMessage(null)
+    
     try {
-      await createJobPosting(formData)
-    } catch (error) {
+      // Convert FormData to JSON
+      const jobData = {
+        title: formData.get("title") as string,
+        description: formData.get("description") as string,
+        requirements: (formData.get("requirements") as string)?.split("\n").filter(Boolean) || [],
+        skills: (formData.get("skills") as string)?.split(",").map(s => s.trim()).filter(Boolean) || [],
+        location: formData.get("location") as string,
+        job_type: formData.get("job_type") as string,
+        experience_level: formData.get("experience_level") as string,
+        salary_min: Number(formData.get("salary_min") as string) || undefined,
+        salary_max: Number(formData.get("salary_max") as string) || undefined,
+        is_featured: formData.get("is_featured") === "on",
+        is_urgent: formData.get("is_urgent") === "on",
+        company_name: "Test Company",
+        employer_id: "test-employer-123"
+      }
+
+      console.log("Submitting job data:", jobData)
+
+      const response = await fetch("/api/post-job", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(jobData),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setMessage({
+          type: "success",
+          text: "Job posted successfully! Redirecting to jobs page..."
+        })
+        
+        // Redirect to jobs page after a short delay
+        setTimeout(() => {
+          window.location.href = "/jobs"
+        }, 2000)
+      } else {
+        throw new Error(result.message || "Failed to post job")
+      }
+    } catch (error: any) {
       console.error("Error:", error)
+      setMessage({
+        type: "error",
+        text: error.message || "Failed to post job. Please try again."
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -25,6 +72,25 @@ export default function JobPostingForm() {
       animate={{ opacity: 1, y: 0 }}
       className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-800"
     >
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`mb-6 p-4 rounded-xl flex items-center space-x-3 ${
+            message.type === "success" 
+              ? "bg-green-500/20 border border-green-500/30 text-green-300" 
+              : "bg-red-500/20 border border-red-500/30 text-red-300"
+          }`}
+        >
+          {message.type === "success" ? (
+            <CheckCircle className="w-5 h-5" />
+          ) : (
+            <AlertCircle className="w-5 h-5" />
+          )}
+          <span>{message.text}</span>
+        </motion.div>
+      )}
+
       <form action={handleSubmit} className="space-y-8">
         {/* Job Title */}
         <div>

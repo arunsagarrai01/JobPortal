@@ -1,12 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { allJobs } from "@/lib/data"
+import { getJobById } from "@/lib/jobs"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300))
-
-    const job = allJobs.find((j) => j.id === Number.parseInt(params.id))
+    const job = await getJobById(params.id)
 
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 })

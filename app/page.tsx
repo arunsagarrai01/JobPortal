@@ -1,20 +1,35 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import HeroSection from "@/components/HeroSection"
 import SearchBar from "@/components/SearchBar"
 import JobCard from "@/components/JobCard"
 import AnimatedBackground from "@/components/AnimatedBackground"
-import { featuredJobs, allJobs, topEmployers } from "@/lib/data"
+import { getFeaturedJobs, type Job } from "@/lib/jobs"
 import { Briefcase, Users, TrendingUp, MapPin } from "lucide-react"
 
-
-// setupAppwrite()
 export default function HomePage() {
+  const [featuredJobs, setFeaturedJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(true)
 
+  useEffect(() => {
+    const loadFeaturedJobs = async () => {
+      try {
+        const jobs = await getFeaturedJobs(6)
+        setFeaturedJobs(jobs)
+      } catch (error) {
+        console.error("Error loading featured jobs:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadFeaturedJobs()
+  }, [])
 
   const displayStats = [
-    { icon: Briefcase, label: "Active Jobs", value: `${allJobs.length}+` },
+    { icon: Briefcase, label: "Active Jobs", value: "500+" },
     { icon: Users, label: "Job Seekers", value: "15,000+" },
     { icon: TrendingUp, label: "Success Rate", value: "85%" },
     { icon: MapPin, label: "Cities", value: "77" },
@@ -39,6 +54,15 @@ export default function HomePage() {
       description: "Apply directly and connect with top employers",
       icon: "🚀",
     },
+  ]
+
+  const topEmployers = [
+    { id: 1, name: "TechCorp Nepal", logo_url: "/placeholder.svg" },
+    { id: 2, name: "GrowthHub", logo_url: "/placeholder.svg" },
+    { id: 3, name: "DesignStudio", logo_url: "/placeholder.svg" },
+    { id: 4, name: "DataFlow Analytics", logo_url: "/placeholder.svg" },
+    { id: 5, name: "AppWorks", logo_url: "/placeholder.svg" },
+    { id: 6, name: "EduTech Solutions", logo_url: "/placeholder.svg" },
   ]
   
   return (
@@ -105,19 +129,31 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredJobs.slice(0, 6).map((job, index) => (
-              <motion.div
-                key={job.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <JobCard job={job} />
-              </motion.div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="bg-gray-900/50 rounded-2xl p-6 border border-gray-800 animate-pulse">
+                  <div className="h-4 bg-gray-700 rounded w-3/4 mb-4"></div>
+                  <div className="h-3 bg-gray-700 rounded w-1/2 mb-2"></div>
+                  <div className="h-3 bg-gray-700 rounded w-2/3"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredJobs.map((job, index) => (
+                <motion.div
+                  key={job.$id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <JobCard job={job} />
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           <motion.div
             initial={{ opacity: 0 }}

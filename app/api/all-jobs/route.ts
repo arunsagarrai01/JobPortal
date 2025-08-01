@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { databases, DATABASE_ID, JOBS_COLLECTION_ID, COMPANIES_COLLECTION_ID } from "@/lib/appwrite"
 
-// Test jobs as fallback
+// Test jobs as fallback only
 const TEST_JOBS = [
   {
     $id: "test-job-1",
@@ -77,14 +77,14 @@ const TEST_JOBS = [
 
 export async function GET() {
   try {
-    console.log("API: Fetching jobs...")
+    console.log("All Jobs API: Fetching from real database...")
     
-    let allJobs = [...TEST_JOBS] // Always start with test jobs
+    let allJobs = []
     
     // Try to get real jobs from database
     try {
       const response = await databases.listDocuments(DATABASE_ID, JOBS_COLLECTION_ID, [])
-      console.log("API: Found", response.documents.length, "real jobs in database")
+      console.log("All Jobs API: Found", response.documents.length, "real jobs in database")
       
       if (response.documents.length > 0) {
         // Get company details for real jobs
@@ -94,24 +94,31 @@ export async function GET() {
               const company = await databases.getDocument(DATABASE_ID, COMPANIES_COLLECTION_ID, job.company_id)
               return { ...job, company }
             } catch (error) {
-              console.log(`API: Error fetching company ${job.company_id}:`, error)
+              console.log(`All Jobs API: Error fetching company ${job.company_id}:`, error)
               return { ...job, company: null }
             }
           }),
         )
         
-        // Add real jobs to the beginning
-        allJobs = [...realJobsWithCompanies, ...TEST_JOBS]
+        allJobs = realJobsWithCompanies
       }
     } catch (error) {
-      console.log("API: Database fetch failed, using test jobs only:", error)
-      // Keep test jobs if database fails
+      console.log("All Jobs API: Database fetch failed:", error)
+    }
+    
+    // Add test jobs if no real jobs found
+    if (allJobs.length === 0) {
+      console.log("All Jobs API: No real jobs found, using test jobs")
+      allJobs = [...TEST_JOBS]
+    } else {
+      console.log("All Jobs API: Adding test jobs to real jobs")
+      allJobs = [...allJobs, ...TEST_JOBS]
     }
     
     // Sort by creation date (newest first)
     allJobs.sort((a: any, b: any) => new Date(b.$createdAt).getTime() - new Date(a.$createdAt).getTime())
     
-    console.log("API: Returning", allJobs.length, "total jobs")
+    console.log("All Jobs API: Returning", allJobs.length, "jobs")
     
     return NextResponse.json({
       success: true,
@@ -119,10 +126,10 @@ export async function GET() {
       count: allJobs.length
     })
   } catch (error: any) {
-    console.error("API Error:", error)
+    console.error("All Jobs API Error:", error)
     return NextResponse.json({
       success: false,
       error: error.message
     }, { status: 500 })
   }
-}
+} 

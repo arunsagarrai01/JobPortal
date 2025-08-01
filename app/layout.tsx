@@ -8,14 +8,12 @@ import "./globals.css"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 
-
 const inter = Inter({ subsets: ["latin"] })
-
 
 export const metadata: Metadata = {
   title: "KaamKhoj - Find Work. Find Yourself.",
   description: "Nepal's premier job portal for students and youth. Discover opportunities, build your career.",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({

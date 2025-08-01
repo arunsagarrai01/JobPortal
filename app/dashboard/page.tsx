@@ -2,23 +2,27 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { useAuth } from "@/lib/auth-context"
+import { useUser } from "@clerk/nextjs"
 import { Briefcase, Heart, Eye, Users, Plus, TrendingUp, Calendar } from "lucide-react"
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, isLoaded } = useUser()
   const [activeTab, setActiveTab] = useState("overview")
 
-  if (!user) {
+  if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
-          <p className="text-gray-400">Please log in to access your dashboard.</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="text-gray-400 mt-4">Loading...</p>
         </div>
       </div>
     )
   }
+
+  // For now, we'll show the dashboard even without authentication
+  // In a real app, you'd redirect to sign-in if user is not authenticated
+  const userType = "seeker" // This should come from your Appwrite user data
 
   const seekerStats = [
     { icon: Briefcase, label: "Applications", value: "12", color: "text-blue-400" },
@@ -75,10 +79,10 @@ export default function DashboardPage() {
     },
   ]
 
-  const stats = user.type === "seeker" ? seekerStats : employerStats
+  const stats = userType === "seeker" ? seekerStats : employerStats
 
   const tabs =
-    user.type === "seeker"
+    userType === "seeker"
       ? [
           { id: "overview", label: "Overview" },
           { id: "applications", label: "My Applications" },
@@ -97,9 +101,11 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome back, {user.name}!</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Welcome back, {user ? (user.firstName || user.emailAddresses[0]?.emailAddress) : "User"}!
+          </h1>
           <p className="text-gray-400">
-            {user.type === "seeker"
+            {userType === "seeker"
               ? "Track your job applications and discover new opportunities"
               : "Manage your job postings and find the best candidates"}
           </p>
@@ -149,7 +155,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-2">
             {activeTab === "overview" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                {user.type === "seeker" ? (
+                {userType === "seeker" ? (
                   <>
                     <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-800">
                       <h3 className="text-xl font-semibold text-white mb-4">Recent Applications</h3>
@@ -226,7 +232,7 @@ export default function DashboardPage() {
             >
               <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                {user.type === "seeker" ? (
+                {userType === "seeker" ? (
                   <>
                     <button className="w-full flex items-center space-x-3 p-3 bg-gray-800/50 rounded-xl hover:bg-gray-700/50 transition-colors duration-200">
                       <Briefcase className="w-5 h-5 text-blue-400" />
@@ -253,7 +259,7 @@ export default function DashboardPage() {
             </motion.div>
 
             {/* Profile Completion */}
-            {user.type === "seeker" && (
+            {userType === "seeker" && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import type { Job } from "@/lib/data"
+import type { Job } from "@/lib/jobs"
 import { X } from "lucide-react"
 
 interface FilterSidebarProps {
@@ -20,7 +20,7 @@ export default function FilterSidebar({ jobs, onFilterChange }: FilterSidebarPro
   })
 
   // Extract unique values for filters
-  const jobTypes = [...new Set(jobs.map((job) => job.type))]
+  const jobTypes = [...new Set(jobs.map((job) => job.job_type))]
   const locations = [...new Set(jobs.map((job) => job.location))]
   const allSkills = [...new Set(jobs.flatMap((job) => job.skills))]
 
@@ -29,7 +29,7 @@ export default function FilterSidebar({ jobs, onFilterChange }: FilterSidebarPro
 
     // Filter by job type
     if (filters.jobType.length > 0) {
-      filtered = filtered.filter((job) => filters.jobType.includes(job.type))
+      filtered = filtered.filter((job) => filters.jobType.includes(job.job_type))
     }
 
     // Filter by location
@@ -40,8 +40,8 @@ export default function FilterSidebar({ jobs, onFilterChange }: FilterSidebarPro
     // Filter by salary
     if (filters.salary) {
       filtered = filtered.filter((job) => {
-        if (!job.salary) return false
-        const salary = Number.parseInt(job.salary.replace(/[^0-9]/g, ""))
+        if (!job.salary_min && !job.salary_max) return false
+        const salary = job.salary_min || job.salary_max || 0
         switch (filters.salary) {
           case "0-30000":
             return salary <= 30000

@@ -2,17 +2,21 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { getCurrentUser } from "./auth"
+import { currentUser } from "@clerk/nextjs/server"
 import { createApplication } from "./applications"
 import { createJob } from "./jobs"
 import { createCompany, getCompanyByEmployer } from "./companies"
+import { createOrUpdateUser } from "./auth"
 
 export async function submitJobApplication(formData: FormData) {
   try {
-    const user = await getCurrentUser()
-    if (!user) {
+    const clerkUser = await currentUser()
+    if (!clerkUser) {
       throw new Error("User not authenticated")
     }
+
+    // Get or create user in Appwrite
+    const user = await createOrUpdateUser(clerkUser, "seeker")
 
     const jobId = formData.get("job_id") as string
     const coverLetter = formData.get("cover_letter") as string
@@ -35,10 +39,13 @@ export async function submitJobApplication(formData: FormData) {
 
 export async function createJobPosting(formData: FormData) {
   try {
-    const user = await getCurrentUser()
-    if (!user || user.user_type !== "employer") {
-      throw new Error("Unauthorized")
+    const clerkUser = await currentUser()
+    if (!clerkUser) {
+      throw new Error("User not authenticated")
     }
+
+    // Get or create user in Appwrite
+    const user = await createOrUpdateUser(clerkUser, "employer")
 
     // Get or create company
     let company = await getCompanyByEmployer(user.$id)
@@ -53,7 +60,7 @@ export async function createJobPosting(formData: FormData) {
     const jobData = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
-      requirements: (formData.get("requirements") as string).split("\n").filter(Boolean),
+      requirements: (formData.get("requirements") as string)?.split("\n").filter(Boolean) || [],
       skills: (formData.get("skills") as string)
         .split(",")
         .map((s) => s.trim())
@@ -83,10 +90,13 @@ export async function createJobPosting(formData: FormData) {
 
 export async function updateProfile(formData: FormData) {
   try {
-    const user = await getCurrentUser()
-    if (!user) {
+    const clerkUser = await currentUser()
+    if (!clerkUser) {
       throw new Error("User not authenticated")
     }
+
+    // Get or create user in Appwrite
+    const user = await createOrUpdateUser(clerkUser, "seeker")
 
     // This would update the user profile in Appwrite
     // Implementation depends on your specific needs
