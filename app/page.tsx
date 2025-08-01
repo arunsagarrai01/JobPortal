@@ -8,7 +8,11 @@ import AnimatedBackground from "@/components/AnimatedBackground"
 import { featuredJobs, allJobs, topEmployers } from "@/lib/data"
 import { Briefcase, Users, TrendingUp, MapPin } from "lucide-react"
 
+
+// setupAppwrite()
 export default function HomePage() {
+
+
   const displayStats = [
     { icon: Briefcase, label: "Active Jobs", value: `${allJobs.length}+` },
     { icon: Users, label: "Job Seekers", value: "15,000+" },
@@ -36,7 +40,7 @@ export default function HomePage() {
       icon: "🚀",
     },
   ]
-
+  
   return (
     <div className="relative overflow-hidden">
       <AnimatedBackground />
